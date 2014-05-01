@@ -17,10 +17,10 @@ require 'awesome_print'
 ### rules to the newly created vApp.
 ###
 
-host = 'https://vcloud.example.com'
-user = 'username'
-pass = 'password'
-org  = 'organization'
+host = 'https://cloud201.voonami.com'
+user = 'snewell'
+pass = 'tul5are'
+org  = 'System'
 api  = '5.1'
 
 puts "#################################################################"
@@ -39,35 +39,36 @@ puts "### Fetch and List Organizations"
 orgs = connection.get_organizations
 ap orgs
 
+exit
 ### Fetch and show an organization, COE is an example, you should replace it with your own organization
 
 puts "### Fetch and Show 'COE' Organization"
-org = connection.get_organization(orgs["COE"])
-ap org
+# org = connection.get_organization(orgs["COE"])
+# ap org
 
 ### Fetch and show a vDC, OvDC-PAYG-Bronze-01 is an example, you should replace it with your own vDC
 
 puts "### Fetch and Show 'OvDC-PAYG-Bronze-01' vDC"
-vdc = connection.get_vdc(org[:vdcs]["OvDC-PAYG-Bronze-01"])
-ap vdc
+# vdc = connection.get_vdc(org[:vdcs]["OvDC-PAYG-Bronze-01"])
+# ap vdc
 
 ### Fetch and show a Catalog, Vagrant is an example, you should replace it with your own Catalog
 
 puts "### Fetch and Show 'Vagrant' Catalog"
-cat = connection.get_catalog(org[:catalogs]["Vagrant"])
-ap cat
+# cat = connection.get_catalog(org[:catalogs])
+# ap cat
 
 ### Fetch and show a Catalog Item, precise32 is an example, you should replace it with your own Catalog Item
 
-puts "### Fetch info on Catalog Item 'precise32'"
-catitem = connection.get_catalog_item(cat[:items]["precise32"])
-ap catitem
+# puts "### Fetch info on Catalog Item 'precise32'"
+# catitem = connection.get_catalog_item(cat[:items]["precise32"])
+# ap catitem
 
 ### Fetch and show a vApp Template, precise32 is an example, you should replace it with your own vApp Template
 
-puts "### Show vApp Template 'precise32'"
-vapp = connection.get_vapp_template(catitem[:items]["precise32"])
-ap vapp
+# puts "### Show vApp Template 'precise32'"
+# vapp = connection.get_vapp_template(catitem[:items]["precise32"])
+# ap vapp
 
 ### Compose a vApp, you should replace the Org vDC with your own, as well as changing the VM to be used as source
 
@@ -149,16 +150,16 @@ wait = connection.wait_task_completion(delete)
 
 puts "### Upload vcloud_precise64.ovf to 'OvDC-PAYG-Bronze-01' 'Vagrant' catalog"
 upload = connection.upload_ovf(
-	org[:vdcs]["OvDC-PAYG-Bronze-01"], 
-	"precise64", 
-	"Precise64 upload", 
-	"dumpster/vcloud_precise64.ovf", 
-	org[:catalogs]["Vagrant"], 
-	{ 
-		:progressbar_enable => true, 
-		:retry_time => 20, 
-		:chunksize => 5242880, 
-		:progressbar_format => "%t |%w%i| %e", 
+	org[:vdcs]["OvDC-PAYG-Bronze-01"],
+	"precise64",
+	"Precise64 upload",
+	"dumpster/vcloud_precise64.ovf",
+	org[:catalogs]["Vagrant"],
+	{
+		:progressbar_enable => true,
+		:retry_time => 20,
+		:chunksize => 5242880,
+		:progressbar_format => "%t |%w%i| %e",
 		:progressbar_length => 80,
 		:send_manifest => false
 	})

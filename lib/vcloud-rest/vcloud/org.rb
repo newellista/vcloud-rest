@@ -1,5 +1,94 @@
+require 'pry'
+
 module VCloudClient
   class Connection
+    ## Enable/Disable an organization
+    #
+    def enable_organization(organization_id, bEnabled = true)
+      params = {
+        'method' => :post,
+        'command' => "/admin/org/#{organization_id}/action/#{ bEnabled ? 'enable' : 'disable'}"
+      }
+
+      send_request(params)
+    end
+
+    ## Create an organization
+    #
+    def create_organization(org_name, org_description, org_fullname)
+      params = {
+        'method' => :post,
+        'command' => '/admin/orgs'
+      }
+
+      builder = Nokogiri::XML::Builder.new do |xml|
+      xml.AdminOrg(
+        "xmlns" => "http://www.vmware.com/vcloud/v1.5",
+        "name" => org_name,
+        "type" => "application/vnd.vmware.admin.organization+xml") {
+        xml.Description org_description
+        xml.FullName org_fullname
+        xml.Settings {
+          xml.OrgGeneralSettings {
+            xml.CanPublishCatalogs 'false'
+            xml.CanPublishExternally 'false'
+            xml.CanSubscribe 'true'
+            xml.DeployedVMQuota '0'
+            xml.StoredVmQuota '0'
+            xml.UseServerBootSequence 'false'
+            xml.DelayAfterPowerOnSeconds '0'
+          }
+          xml.OrgLdapSettings {
+            xml.OrgLdapMode 'SYSTEM'
+            xml.CustomUsersOu
+          }
+          xml.OrgEmailSettings {
+            xml.IsDefaultSmtpServer 'true'
+            xml.IsDefaultOrgEmail 'true'
+            xml.FromEmailAddress
+            xml.DefaultSubjectPrefix
+            xml.IsAlertEmailToAllAdmins 'true'
+          }
+        }
+      }
+      end
+
+      response, headers = send_request(params, builder.to_xml, "application/vnd.vmware.admin.organization+xml")
+
+      ##
+      # TODO: Parse response and return Organization ID
+      ##
+
+      id_urn = response.css("AdminOrg").attribute("id")
+
+      id_urn.to_s.split(':').last
+
+    end
+
+    ##
+    # Create a Local User
+    def create_organization_admin(organization_id, full_name, email, username, password, role)
+      params = {
+        'method' => :post,
+        'command' => "/admin/org/#{organization_id}/users"
+      }
+
+      builder = Nokogiri::XML::Builder.new do |xml|
+      xml.User(
+        "xmlns" => "http://www.vmware.com/vcloud/v1.5",
+        "name" => "#{username}") {
+          xml.FullName full_name
+          xml.EmailAddress email
+          xml.IsEnabled true
+          xml.Role role
+          xml.Password password
+          xml.GroupReferences
+        }
+      end
+
+      response, headers = send_request(params, builder.to_xml, "application/vnd.vmware.admin.user+xml")
+    end
+
     ##
     # Fetch existing organizations and their IDs
     def get_organizations
@@ -9,6 +98,7 @@ module VCloudClient
       }
 
       response, headers = send_request(params)
+
       orgs = response.css('OrgList Org')
 
       results = {}

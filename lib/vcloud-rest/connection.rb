@@ -138,6 +138,8 @@ module VCloudClient
           headers.merge!({:content_type => content_type})
         end
 
+        puts "#{@api_url}#{params['command']}"
+
         request = RestClient::Request.new(:method => params['method'],
                                          :user => "#{@username}@#{@org_name}",
                                          :password => @password,
